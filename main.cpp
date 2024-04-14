@@ -1,6 +1,12 @@
 #include <iostream>
 #include <cstdint> // Include this for uint8_t and uint16_t
+#include <bitset>
 
+template <typename T>
+std::string printBits(T num) {
+    std::bitset<sizeof(T) * 8> binary(num);
+    return binary.to_string();
+}
 
 // Function to encode data using Hamming (8,4) code
 uint16_t hamming_encode(uint8_t data) {
@@ -41,7 +47,7 @@ uint8_t hamming_decode(uint16_t encoded_data) {
     // If the XOR of A, B, C is true and D is false
     else if ((A ^ B ^ C) && !D) {
         std::cout << "Error detected in P4." << std::endl;
-        return 0;
+        return (D1 << 3) | (D2 << 2) | (D3 << 1) | D4;
     } 
     // If the XOR of A, B, C is false and D is true
     else if (!(A ^ B ^ C) && D) {
@@ -64,6 +70,8 @@ uint8_t hamming_decode(uint16_t encoded_data) {
             D4 ^= 1;
         }
         std::cout << "Single error detected in received data. Corrected it." << std::endl;
+
+        return (D1 << 3) | (D2 << 2) | (D3 << 1) | D4;
     }
 
 }
@@ -75,5 +83,9 @@ int main() {
     uint16_t encoded_data = hamming_encode(data);
     // Decode the data
     uint8_t decoded_data = hamming_decode(encoded_data);
+
+    std::cout << "Input data: " << printBits(13) << std::endl;
+    std::cout << "Encoded data: " << printBits(encoded_data) << std::endl;
+    std::cout << "Decoded data: " << printBits(decoded_data) << std::endl;
     return 0;
 }
