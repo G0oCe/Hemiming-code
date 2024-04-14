@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdint> // Include this for uint8_t and uint16_t
 
+
 // Function to encode data using Hamming (8,4) code
 uint16_t hamming_encode(uint8_t data) {
     uint8_t D1 = (data >> 3) & 1;
@@ -27,19 +28,44 @@ uint8_t hamming_decode(uint16_t encoded_data) {
     uint8_t P4 = (encoded_data >> 1) & 1;
     uint8_t D4 = encoded_data & 1;
 
-    uint8_t P1_calc = D1 ^ D3 ^ D4;
-    uint8_t P2_calc = D1 ^ D2 ^ D4;
-    uint8_t P3_calc = D1 ^ D2 ^ D3;
-    uint8_t P4_calc = P1_calc ^ D1 ^ D2 ^ D3 ^ D4;
+    uint8_t A = 1 ^ P1 ^ D1 ^ P3 ^ D3;
+    uint8_t B = 1 ^ P1 ^ D1 ^ P2 ^ D2;
+    uint8_t C = 1 ^ P2 ^ D2 ^ P3 ^ D3;
+    uint8_t D = 1 ^ P1 ^ D1 ^ P2 ^ D2 ^ P3 ^ D3 ^ P4 ^ D4;
 
-    // If the calculated parity bits match the received parity bits, return the data bits
-    if (P1 == P1_calc && P2 == P2_calc && P3 == P3_calc && P4 == P4_calc) {
+    // If the XOR of A, B, C is true and D is true
+    if ((A ^ B ^ C) && D) {
+        // Return the bitwise shift and OR operation result
         return (D1 << 3) | (D2 << 2) | (D3 << 1) | D4;
-    } else {
-        // If the parity bits do not match, print an error message and return 0
-        std::cout << "Error detected in received data." << std::endl;
+    } 
+    // If the XOR of A, B, C is true and D is false
+    else if ((A ^ B ^ C) && !D) {
+        std::cout << "Error detected in P4." << std::endl;
         return 0;
+    } 
+    // If the XOR of A, B, C is false and D is true
+    else if (!(A ^ B ^ C) && D) {
+        std::cout << "Double error detected in received data." << std::endl;
+        return 0;
+    } 
+    // If none of the above conditions are met
+    else {
+        // Check the values of A, B, C and update D1, D2, D3, D4 accordingly
+        if (A == 0 && B == 0 && C == 0) {
+            D1 ^= 1;
+        } 
+        if (A == 1 && B == 0 && C == 0) {
+            D2 ^= 1;
+        } 
+        if (A == 0 && B == 1 && C == 0) {
+            D3 ^= 1;
+        } 
+        if (A == 0 && B == 0 && C == 1) {
+            D4 ^= 1;
+        }
+        std::cout << "Single error detected in received data. Corrected it." << std::endl;
     }
+
 }
 
 int main() {
