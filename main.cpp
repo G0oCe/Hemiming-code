@@ -8,8 +8,14 @@ std::string printBits(T num) {
     return binary.to_string();
 }
 
+template <typename T>
+T cutter(T data) {
+    T buff = data;
+    return buff >>= (sizeof(T) * 4); // Right shift by half of the size in bits
+}
+
 // Function to encode data using Hamming (8,4) code
-uint16_t hamming_encode(uint8_t data) {
+uint16_t hamming_encode_(uint8_t data) {
     uint8_t D1 = (data >> 3) & 1;
     uint8_t D2 = (data >> 2) & 1;
     uint8_t D3 = (data >> 1) & 1;
@@ -23,8 +29,16 @@ uint16_t hamming_encode(uint8_t data) {
     return (P1 << 7) | (D1 << 6) | (P2 << 5) | (D2 << 4) | (P3 << 3) | (D3 << 2) | (P4 << 1) | D4;
 }
 
+uint16_t hamming_encode(uint8_t data) {
+    uint16_t fst_part = hamming_encode_(data);
+    uint16_t snd_part = hamming_encode_(cutter(data));
+
+    return fst_part | (snd_part << 8);
+}
+
+
 // Function to decode data using Hamming (8,4) code
-uint8_t hamming_decode(uint16_t encoded_data) {
+uint8_t hamming_decode_(uint16_t encoded_data) {
     uint8_t P1 = (encoded_data >> 7) & 1;
     uint8_t D1 = (encoded_data >> 6) & 1;
     uint8_t P2 = (encoded_data >> 5) & 1;
@@ -76,15 +90,23 @@ uint8_t hamming_decode(uint16_t encoded_data) {
 
 }
 
+uint8_t hamming_decode(uint16_t encoded_data) {
+    uint8_t fst_part = hamming_decode_(encoded_data);
+    uint8_t snd_part = hamming_decode_(cutter(encoded_data));
+
+    return fst_part | (snd_part << 4);
+}
+
+
 int main() {
     // Replace with your data
-    uint8_t data = 13; // 1101 in binary
+    uint8_t data = 150; // 10010110 in binary
     // Encode the data
     uint16_t encoded_data = hamming_encode(data);
     // Decode the data
     uint8_t decoded_data = hamming_decode(encoded_data);
 
-    std::cout << "Input data: " << printBits(13) << std::endl;
+    std::cout << "Input data: " << printBits(data) << std::endl;
     std::cout << "Encoded data: " << printBits(encoded_data) << std::endl;
     std::cout << "Decoded data: " << printBits(decoded_data) << std::endl;
     return 0;
