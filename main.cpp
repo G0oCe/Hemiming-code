@@ -48,10 +48,10 @@ uint8_t hamming_decode_(uint16_t encoded_data) {
     uint8_t P4 = (encoded_data >> 1) & 1;
     uint8_t D4 = encoded_data & 1;
 
-    uint8_t A = 1 ^ P1 ^ D1 ^ P3 ^ D3;
-    uint8_t B = 1 ^ P1 ^ D1 ^ P2 ^ D2;
-    uint8_t C = 1 ^ P2 ^ D2 ^ P3 ^ D3;
-    uint8_t D = 1 ^ P1 ^ D1 ^ P2 ^ D2 ^ P3 ^ D3 ^ P4 ^ D4;
+    uint8_t A = P1 ^ D1 ^ D3 ^ D4;
+    uint8_t B = D1 ^ P2 ^ D2 ^ D4;
+    uint8_t C = D1 ^ D2 ^ P3 ^ D3;
+    uint8_t D = P1 ^ D1 ^ P2 ^ D2 ^ P3 ^ D3 ^ P4 ^ D4;
 
     // If the XOR of A, B, C is true and D is true
     if ((A ^ B ^ C) && D) {
