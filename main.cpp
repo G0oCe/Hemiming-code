@@ -53,34 +53,35 @@ uint8_t hamming_decode_single(uint16_t encoded_data) {
     uint8_t C = D1 ^ D2 ^ P3 ^ D3;
     uint8_t D = P1 ^ D1 ^ P2 ^ D2 ^ P3 ^ D3 ^ P4 ^ D4;
 
+
     // If the XOR of A, B, C is true and D is true
-    if ((!A && !B && !C) && !D) {
+    if ((A && B && C) && D) {
         // Return the bitwise shift and OR operation result
         return (D1 << 3) | (D2 << 2) | (D3 << 1) | D4;
     } 
     // If the XOR of A, B, C is true and D is false
-    else if ((!A && !B && !C) && D) {
+    else if ((A && B && C) && D) {
         //std::cout << "Error detected in P4." << std::endl;
         return (D1 << 3) | (D2 << 2) | (D3 << 1) | D4;
     } 
     // If the XOR of A, B, C is false and D is true
-    else if ((A || B || C) && !D) {
+    else if ((!A || !B || !C) && D) {
         //std::cout << "Double error detected in received data." << std::endl;
         return -1;
     }  
     // If none of the above conditions are met
     else {
         // Check the values of A, B, C and update D1, D2, D3, D4 accordingly
-        if (A == 1 && B == 1 && C == 1) {
+        if (A == 0 && B == 0 && C == 0) {
             D1 ^= 1;
         } 
-        if (A == 1 && B == 0 && C == 0 || A == 0 && B == 1 && C == 1) {
+        if (A == 1 && B == 0 && C == 0) {
             D2 ^= 1;
         } 
-        if (A == 0 && B == 1 && C == 0 || A == 1 && B == 0 && C == 1) {
+        if (A == 0 && B == 1 && C == 0) {
             D3 ^= 1;
         } 
-        if (A == 0 && B == 0 && C == 1 || A == 1 && B == 1 && C == 0) {
+        if (A == 0 && B == 0 && C == 1) {
             D4 ^= 1;
         }
         //std::cout << "Single error detected in received data. Corrected it." << std::endl;
@@ -99,6 +100,8 @@ uint8_t hamming_decode(uint16_t encoded_data) {
     }
     return fst_part | (snd_part << 4);
 }
+
+
 
 /*
 int main() {
